@@ -1,1 +1,46 @@
-example file
+options:
+    version: 0.1
+
+on load:
+    create directory "plugins/harmonypanel"
+
+function checkForUpdate():
+    set {_pbversion} to text from "https://pastebin.com/raw/742AutPi"
+    if {_pbversion} > {@version}:
+        set {harmony.panel.checkforupdate} to "outdated"
+        stop
+    else if {_pbversion} is {@version}:
+        set {harmony.panel.checkforupdate} to "uptodate"
+        stop
+    else:
+        set {harmony.panel.checkforupdate} to "overdated"
+        stop
+
+function updatePanel():
+    delete file "plugins/Skript/scripts/%script%.sk"
+    download file from "https://raw.githubusercontent.com/Skridiotic/panel/main/harmonypanel.sk" to file "plugins/Skript/scripts/%script%.sk"
+
+command /hpanel:
+    trigger:
+        create a gui with virtual chest inventory with 3 rows named "§dmain §7| §2idle"
+        edit gui last gui:
+            make gui 13 with paper named "check for panel updates" with custom model data 5044001:
+                set the name of the edited gui to "§dmain §7| §2checking for update"
+                make gui 13 with paper named "§bchecking..." with custom model data 5044002
+                checkForUpdate()
+                if {harmony.panel.checkforupdate} is "outdated":
+                    make gui 13 with paper named "§6outdated, updating..." with custom model data 5044003
+                    set the name of the edited gui to "§dmain §7| §2updating"
+                    updatePanel()
+                    set the name of the edited gui to "§lPlease exit the gui."
+                    reload script script
+                if {harmony.panel.checkforupdate} is "uptodate":
+                    set the name of the edited gui to "§dmain §7| §2idle"
+                if {harmony.panel.checkforupdate} is "overdated":
+                    make gui 13 with paper named "§coverdated? downgrading..." with custom model data 5044005
+                    set the name of the edited gui to "§dmain §7| §2downgrading"
+                    updatePanel()
+                    set the name of the edited gui to "§lPlease exit the gui."
+                    reload script script
+                make gui 13 with paper named "§aup to date!" with custom model data 5044004
+            open last gui for player
